@@ -397,24 +397,24 @@ h2{font-family:'Playfair Display',serif;font-size:48px;line-height:1.1;font-weig
 
 <section class="section section-graphite">
   <div class="container">
-    <span class="eyebrow">Среда для жизни</span>
-    <h2>Терраса, парящая над лесом</h2>
+    <span class="eyebrow">Производство</span>
+    <h2>Одна технология, много систем и продуктов</h2>
     <div class="env-grid" style="margin-top:40px">
       <div class="env-item reveal">
-        <!-- TODO: temporary stand-in, replace with a dedicated terrace photo -->
-        <img src="image/hero-main.jpg" alt="Терраса над лесом" loading="lazy">
-        <div class="env-overlay"><p>Микро-история 01</p><h4>Терраса, парящая над лесом</h4></div>
+        <!-- TODO: temporary stand-in, replace with a dedicated production/workshop photo -->
+        <img src="image/hero-main.jpg" alt="Производство и новые формы" loading="lazy">
+        <div class="env-overlay"><p>Микро-история 01</p><h4>Производство и новые формы</h4></div>
       </div>
       <div class="env-stack">
         <div class="env-item small reveal">
-          <!-- TODO: temporary stand-in, replace with a dedicated observatory photo -->
-          <img src="image/project-steklyannaya-skala.jpg" alt="Обсерватория" loading="lazy">
-          <div class="env-overlay"><p>Микро-история 02</p><h4>Обсерватория для звезд</h4></div>
+          <!-- TODO: temporary stand-in, replace with a dedicated innovation/R&D photo -->
+          <img src="image/project-steklyannaya-skala.jpg" alt="Инновации и их реализации" loading="lazy">
+          <div class="env-overlay"><p>Микро-история 02</p><h4>Инновации и их реализации</h4></div>
         </div>
         <div class="env-item small reveal">
-          <!-- TODO: temporary stand-in, replace with a dedicated bedroom photo -->
-          <img src="image/project-sosnovy-bor.jpg" alt="Спальня в кронах" loading="lazy">
-          <div class="env-overlay"><p>Микро-история 03</p><h4>Спальня в кронах</h4></div>
+          <!-- TODO: temporary stand-in, replace with a dedicated patents/product photo -->
+          <img src="image/project-sosnovy-bor.jpg" alt="Патенты на изделия" loading="lazy">
+          <div class="env-overlay"><p>Микро-история 03</p><h4>Патенты на изделия</h4></div>
         </div>
       </div>
     </div>
@@ -459,7 +459,7 @@ h2{font-family:'Playfair Display',serif;font-size:48px;line-height:1.1;font-weig
       <img src="image/construction-cut.jpg" alt="Конструкция в разрезе" loading="lazy">
       <div style="background:var(--bg3);border:1px solid var(--line);padding:32px;display:flex;flex-direction:column;justify-content:center">
         <span class="script">Интерактивный разрез</span>
-        <h3 style="font-family:'Playfair Display',serif;font-size:24px;margin:12px 0">Авторский метод утепления</h3>
+        <h3 style="font-family:'Playfair Display',serif;font-size:24px;margin:12px 0">Авторские разработки</h3>
         <p style="font-size:14px;color:var(--muted);margin-bottom:24px">Пирог стены 240 мм, мембраны, вентзазор. Дом дышит, но не теряет тепло.</p>
         <a href="#contacts" class="btn">Запросить чертежи</a>
       </div>
@@ -521,8 +521,9 @@ h2{font-family:'Playfair Display',serif;font-size:48px;line-height:1.1;font-weig
         <option>Частная резиденция</option>
         <option>Под ключ с участком</option>
       </select>
-      <input type="hidden" name="_subject" value="Новая заявка с сайта OPUS Architects">
-      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="access_key" value="f1263721-f975-40d6-9a11-97a901f031dd">
+      <input type="hidden" name="subject" value="Новая заявка с сайта OPUS Architects">
+      <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
       <button type="submit" class="btn btn-solid" style="width:100%;justify-content:center">Запросить предложение</button>
       <p class="form-error" style="display:none;color:#c0392b;font-size:13px;text-align:center;margin-top:10px">Не удалось отправить заявку. Попробуйте ещё раз или напишите на woodibc@yandex.ru</p>
       <p style="font-size:11px;text-align:center;margin-top:12px;opacity:0.6">Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности</p>
@@ -637,14 +638,15 @@ function handleForm(e){
   btn.disabled=true;
   const prevText=btn.textContent;
   btn.textContent='Отправка...';
-  fetch('https://formsubmit.co/ajax/woodibc@yandex.ru',{
+  fetch('https://api.web3forms.com/submit',{
     method:'POST',
     headers:{'Accept':'application/json'},
     body:new FormData(form)
   }).then(res=>res.json()).then(data=>{
     if(!data || data.success===false || data.success==='false') throw new Error(data && data.message || 'Request failed');
     form.innerHTML='<div style="text-align:center;padding:40px 0"><h3 style="font-family:Playfair Display,serif">Ваш запрос принят</h3><p style="color:var(--muted);margin-top:12px">Архитектор свяжется с вами в ближайшее время, чтобы обсудить ваше видение.</p></div>';
-  }).catch(()=>{
+  }).catch(err=>{
+    console.error('Форма не отправлена:', err.message);
     btn.disabled=false;
     btn.textContent=prevText;
     if(errorEl) errorEl.style.display='block';
