@@ -171,7 +171,13 @@ h2{font-family:'Playfair Display',serif;font-size:48px;line-height:1.1;font-weig
 .form p{font-size:13px;color:var(--muted);margin-bottom:24px}
 .input{width:100%;padding:14px 16px;background:transparent;border:1px solid var(--line);color:var(--text);font-size:14px;margin-bottom:16px;outline:none;transition:.3s}
 .input:focus{border-color:var(--gold)}
+.input:disabled,select.input:disabled{opacity:0.4;cursor:not-allowed}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.consent-row{display:flex;align-items:flex-start;gap:10px;font-size:12px;color:var(--muted);line-height:1.4;margin-bottom:12px;cursor:pointer}
+.consent-row input[type="checkbox"]{flex:0 0 auto;width:16px;height:16px;margin-top:1px;accent-color:var(--gold);cursor:pointer}
+.consent-row a{color:var(--gold);text-decoration:underline}
+.btn-solid:disabled{opacity:0.4;cursor:not-allowed;background:var(--gold)}
+.btn-solid:disabled:hover{background:var(--gold);color:var(--bg)}
 
 /* QUIZ MODAL */
 .modal{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:200;padding:24px}
@@ -520,11 +526,11 @@ h2{font-family:'Playfair Display',serif;font-size:48px;line-height:1.1;font-weig
       <h3>Запросить индивидуальную концепцию</h3>
       <p>Архитектор свяжется с вами в ближайшее время, чтобы обсудить ваше видение.</p>
       <div class="form-grid">
-        <input class="input" name="name" placeholder="Ваше имя" required>
-        <input class="input" name="phone" placeholder="+7 (___) ___-__-__" required>
+        <input class="input" id="fieldName" name="name" placeholder="Ваше имя" required disabled>
+        <input class="input" id="fieldPhone" name="phone" placeholder="+7 (___) ___-__-__" required disabled>
       </div>
-      <input class="input" name="email" type="email" placeholder="Email" required>
-      <select class="input" name="project_type" required>
+      <input class="input" id="fieldEmail" name="email" type="email" placeholder="Email" required disabled>
+      <select class="input" id="fieldProjectType" name="project_type" required disabled>
         <option value="" disabled selected>Тип проекта</option>
         <option>Коммерческий глэмпинг</option>
         <option>Частная резиденция</option>
@@ -533,9 +539,18 @@ h2{font-family:'Playfair Display',serif;font-size:48px;line-height:1.1;font-weig
       <input type="hidden" name="access_key" value="633ec76d-87c8-44be-9099-41bbf3e531eb">
       <input type="hidden" name="subject" value="Новая заявка с сайта OPUS Architects">
       <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off">
-      <button type="submit" class="btn btn-solid" style="width:100%;justify-content:center">Запросить предложение</button>
+
+      <label class="consent-row">
+        <input type="checkbox" id="consentData" required onchange="updateFormGate()">
+        <span>Согласие на обработку персональных данных</span>
+      </label>
+      <label class="consent-row">
+        <input type="checkbox" id="consentPolicy" required onchange="handlePolicyConsent(this)">
+        <span>Согласие с <a href="privacy-policy.html" target="_blank" rel="noopener" onclick="event.stopPropagation()">Политикой конфиденциальности</a></span>
+      </label>
+
+      <button type="submit" id="submitBtn" class="btn btn-solid" style="width:100%;justify-content:center" disabled>Запросить предложение</button>
       <p class="form-error" style="display:none;color:#c0392b;font-size:13px;text-align:center;margin-top:10px">Не удалось отправить заявку. Попробуйте ещё раз или напишите на woodibc@yandex.ru</p>
-      <p style="font-size:11px;text-align:center;margin-top:12px;opacity:0.6">Нажимая кнопку, вы соглашаетесь с политикой конфиденциальности</p>
     </form>
   </div>
 </section>
@@ -677,12 +692,35 @@ function finishQuiz(){
 }
 
 // Form
+// Форма заблокирована (все поля + кнопка disabled в разметке), пока владелец данных не
+// отметит оба согласия — обработка персональных данных и политика конфиденциальности.
+// Открытие политики отдельным окном (privacy-policy.html) — и по клику на ссылку в тексте
+// согласия, и автоматически при простановке самой галочки, чтобы человек гарантированно
+// увидел текст политики перед тем, как дать согласие.
+function updateFormGate(){
+  const dataOk = document.getElementById('consentData').checked;
+  const policyOk = document.getElementById('consentPolicy').checked;
+  const enabled = dataOk && policyOk;
+  ['fieldName','fieldPhone','fieldEmail','fieldProjectType','submitBtn'].forEach(function(id){
+    document.getElementById(id).disabled = !enabled;
+  });
+}
+function handlePolicyConsent(checkbox){
+  if(checkbox.checked){
+    window.open('privacy-policy.html', '_blank', 'noopener');
+  }
+  updateFormGate();
+}
+
 function handleForm(e){
   e.preventDefault();
   const form=e.target;
   const errorEl=form.querySelector('.form-error');
   const btn=form.querySelector('button[type="submit"]');
   if(errorEl) errorEl.style.display='none';
+  if(!document.getElementById('consentData').checked || !document.getElementById('consentPolicy').checked){
+    return;
+  }
   btn.disabled=true;
   const prevText=btn.textContent;
   btn.textContent='Отправка...';
